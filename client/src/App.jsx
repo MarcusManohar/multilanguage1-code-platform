@@ -1,122 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState, useEffect, useCallback } from 'react';
+import Home from './pages/Home';
+import Compiler from './pages/Compiler';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  // Parse path & params from window.location
+  const parseLocation = useCallback(() => {
+    const pathname = window.location.pathname || '/';
+    const searchParams = new URLSearchParams(window.location.search);
+    const lang = searchParams.get('lang');
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    // Normalize route
+    let route = pathname;
+    if (pathname.endsWith('/') && pathname.length > 1) {
+      route = pathname.slice(0, -1);
+    }
 
-      <div className="ticks"></div>
+    return {
+      route: route || '/',
+      params: { lang },
+    };
+  }, []);
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+  const [locationState, setLocationState] = useState(parseLocation);
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  // Custom navigate function for clean SPA routing without extra dependencies
+  const navigate = useCallback((url) => {
+    const targetUrl = new URL(url, window.location.origin);
+    const pathname = targetUrl.pathname || '/';
+    const lang = targetUrl.searchParams.get('lang');
+
+    let normalizedRoute = pathname;
+    if (pathname.endsWith('/') && pathname.length > 1) {
+      normalizedRoute = pathname.slice(0, -1);
+    }
+
+    window.history.pushState({}, '', url);
+    setLocationState({
+      route: normalizedRoute || '/',
+      params: { lang },
+    });
+
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      setLocationState(parseLocation());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [parseLocation]);
+
+  // Route matching
+  const { route, params } = locationState;
+
+  if (route === '/compiler') {
+    return <Compiler onNavigate={navigate} initialLanguageId={params.lang} />;
+  }
+
+  if (route === '/login') {
+    return <Login onNavigate={navigate} />;
+  }
+
+  if (route === '/signup') {
+    return <Signup onNavigate={navigate} />;
+  }
+
+  // Default to Home page
+  return <Home onNavigate={navigate} />;
 }
-
-export default App
