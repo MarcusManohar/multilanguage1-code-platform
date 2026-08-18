@@ -1,4 +1,4 @@
-const jobService = require('../services/job.service');
+const onlineCompilerService = require('../services/onlineCompiler.service');
 
 /**
  * Execution Controller
@@ -10,17 +10,27 @@ class ExecutionController {
    */
   async runCode(req, res, next) {
     try {
-      const { language, code, stdin } = req.body;
+      const { language, code, stdin = '' } = req.body;
 
-      const job = jobService.createExecutionJob({ language, code, stdin });
+      if (!language || typeof language !== 'string' || !language.trim()) {
+        const error = new Error('Field "language" is required and must be a non-empty string.');
+        error.status = 400;
+        throw error;
+      }
 
-      return res.status(200).json({
-        success: true,
-        status: job.status,
-        message: job.message,
-        jobId: job.jobId,
-        language: job.language,
+      if (code === undefined || code === null || typeof code !== 'string') {
+        const error = new Error('Field "code" is required and must be a string.');
+        error.status = 400;
+        throw error;
+      }
+
+      const result = await onlineCompilerService.executeCode({
+        language,
+        code,
+        stdin,
       });
+
+      return res.status(200).json(result);
     } catch (error) {
       return next(error);
     }
@@ -28,3 +38,4 @@ class ExecutionController {
 }
 
 module.exports = new ExecutionController();
+

@@ -8,6 +8,7 @@ import SettingsModal from '../components/SettingsModal';
 import ShareModal from '../components/ShareModal';
 import Toast from '../components/Toast';
 import { LANGUAGES, DEFAULT_LANGUAGE } from '../constants/languages';
+import { runCode } from '../services/execution.service';
 
 export default function Compiler({ onNavigate, initialLanguageId }) {
   // Determine initial language (support ?lang= query or default)
@@ -99,20 +100,62 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
     showToast(`Reset ${currentLanguage.name} code to default template`, 'info');
   };
 
-  // Run Code logic (Mock / Hackathon preview)
-  const handleRunCode = useCallback(() => {
+  // Run Code logic connecting to backend execution endpoint
+  const handleRunCode = useCallback(async () => {
     if (isRunning) return;
 
     setIsRunning(true);
     setActiveConsoleTab('output');
 
-    setTimeout(() => {
+    const codeToRun = codes[currentLanguage.id] || '';
+
+    try {
+      const response = await runCode({
+        language: currentLanguage.id,
+        code: codeToRun,
+        stdin,
+      });
+
+      const { success, output, error, exitCode, executionTime } = response;
+
+      if (output !== undefined && output !== null && output !== '') {
+        setStdout(output);
+      } else if (success) {
+        setStdout('(Program executed successfully with no output)');
+      } else {
+        setStdout('(No standard output)');
+      }
+
+      if (error !== undefined && error !== null && error !== '') {
+        setStderr(error);
+        if (!output || !success) {
+          setActiveConsoleTab('errors');
+        }
+      } else {
+        setStderr('No errors.');
+      }
+
+      if (success) {
+        showToast(
+          `Execution complete (${executionTime || '0.00'}s)`,
+          'success'
+        );
+      } else {
+        showToast(
+          `Execution finished with exit code ${exitCode ?? 1}`,
+          'error'
+        );
+      }
+    } catch (err) {
+      const errorMsg = err.message || 'Failed to execute code';
+      setStderr(errorMsg);
+      setActiveConsoleTab('errors');
+      showToast(errorMsg, 'error');
+    } finally {
       setIsRunning(false);
-      setStdout('Code execution will be connected to the backend in the next stage.');
-      setStderr('No errors.');
-      showToast('Execution preview complete', 'success');
-    }, 700);
-  }, [isRunning, showToast]);
+    }
+  }, [isRunning, codes, currentLanguage.id, stdin, showToast]);
+
 
   // Save Code logic
   const handleSave = useCallback(() => {
