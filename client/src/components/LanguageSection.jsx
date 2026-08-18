@@ -37,7 +37,7 @@ export default function LanguageSection({ onNavigate }) {
                         borderColor: `${lang.color}40`,
                       }}
                     >
-                      {lang.name === 'C++' ? 'C++' : lang.name === 'JavaScript' ? 'JS' : lang.name.slice(0, 2).toUpperCase()}
+                      {lang.name === 'C++' ? 'C++' : lang.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">

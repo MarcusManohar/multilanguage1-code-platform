@@ -35,7 +35,7 @@ export default function Home({ onNavigate }) {
               Ready to start coding?
             </h2>
             <p className="text-base sm:text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-              Open your workspace and start building across C++, Python, Java, C, and JavaScript today.
+              Open your workspace and start building across C++, Python, Java, and C today.
             </p>
             <button
               onClick={() => onNavigate('/compiler')}

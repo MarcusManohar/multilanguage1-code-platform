@@ -9,13 +9,9 @@ const LANGUAGE_COMPILER_MAP = {
   py: 'python-3.14',
   python3: 'python-3.14',
   java: 'openjdk-25',
-  javascript: 'typescript-deno',
-  js: 'typescript-deno',
-  typescript: 'typescript-deno',
-  ts: 'typescript-deno',
 };
 
-const SUPPORTED_LANGUAGES = ['cpp', 'c', 'python', 'java', 'javascript'];
+const SUPPORTED_LANGUAGES = ['cpp', 'c', 'python', 'java'];
 
 class OnlineCompilerService {
   /**

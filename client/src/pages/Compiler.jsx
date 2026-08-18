@@ -3,6 +3,8 @@ import CompilerNavbar from '../components/CompilerNavbar';
 import Sidebar from '../components/Sidebar';
 import CodeEditor from '../components/CodeEditor';
 import ConsolePanel from '../components/ConsolePanel';
+import EvaluationPanel from '../components/EvaluationPanel';
+import AnalysisPanel from '../components/AnalysisPanel';
 import StatusBar from '../components/StatusBar';
 import SettingsModal from '../components/SettingsModal';
 import ShareModal from '../components/ShareModal';
@@ -51,6 +53,8 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  // Bottom panel mode: 'console' | 'evaluate' | 'analyze'
+  const [bottomPanel, setBottomPanel] = useState('console');
 
   // Recent files tracking
   const [recentFiles, setRecentFiles] = useState(() => {
@@ -235,7 +239,7 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
           onSelectRecentFile={handleSelectLanguage}
         />
 
-        {/* Center/Right: Code Editor + Console */}
+        {/* Center/Right: Code Editor + Bottom Panel */}
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Editor Container (occupies most of screen) */}
           <div className="flex-1 min-h-0 relative">
@@ -252,17 +256,94 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
             />
           </div>
 
-          {/* Bottom Console Panel */}
-          <ConsolePanel
-            activeTab={activeConsoleTab}
-            onTabChange={setActiveConsoleTab}
-            stdin={stdin}
-            onChangeStdin={setStdin}
-            stdout={stdout}
-            stderr={stderr}
-            onClearOutput={handleClearOutput}
-            isRunning={isRunning}
-          />
+          {/* Bottom Area: Panel Mode Switcher + Panel */}
+          <div
+            className={`bg-[#0d1117] border-t border-[#30363d] flex flex-col transition-all duration-200 ${
+              bottomPanel === 'evaluate' || bottomPanel === 'analyze' ? 'h-80' : 'h-48'
+            }`}
+          >
+            {/* Mode Tab Bar */}
+            <div className="h-9 bg-[#161b22] border-b border-[#30363d] flex items-center gap-0.5 px-2 shrink-0">
+              <button
+                id="bottom-tab-console"
+                onClick={() => setBottomPanel('console')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                  bottomPanel === 'console'
+                    ? 'bg-[#0d1117] text-white border-t-2 border-indigo-500 border-x border-[#30363d]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Console
+              </button>
+
+              <button
+                id="bottom-tab-evaluate"
+                onClick={() => setBottomPanel('evaluate')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                  bottomPanel === 'evaluate'
+                    ? 'bg-[#0d1117] text-white border-t-2 border-indigo-500 border-x border-[#30363d]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Evaluate
+              </button>
+
+              <button
+                id="bottom-tab-analyze"
+                onClick={() => setBottomPanel('analyze')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                  bottomPanel === 'analyze'
+                    ? 'bg-[#0d1117] text-white border-t-2 border-cyan-500 border-x border-[#30363d]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Analyze
+              </button>
+            </div>
+
+            {/* Panel Content */}
+            <div className="flex-1 overflow-hidden">
+              {bottomPanel === 'console' && (
+                <ConsolePanel
+                  activeTab={activeConsoleTab}
+                  onTabChange={setActiveConsoleTab}
+                  stdin={stdin}
+                  onChangeStdin={setStdin}
+                  stdout={stdout}
+                  stderr={stderr}
+                  onClearOutput={handleClearOutput}
+                  isRunning={isRunning}
+                  embedded
+                />
+              )}
+              {bottomPanel === 'evaluate' && (
+                <EvaluationPanel
+                  code={codes[currentLanguage.id] || ''}
+                  language={currentLanguage}
+                  isRunning={isRunning}
+                />
+              )}
+              {bottomPanel === 'analyze' && (
+                <AnalysisPanel
+                  code={codes[currentLanguage.id] || ''}
+                  language={currentLanguage}
+                  isRunning={isRunning}
+                />
+              )}
+            </div>
+          </div>
         </main>
       </div>
 

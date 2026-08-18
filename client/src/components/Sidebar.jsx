@@ -56,7 +56,7 @@ export default function Sidebar({
                       borderColor: `${lang.color}33`,
                     }}
                   >
-                    {lang.name === 'C++' ? 'C++' : lang.name === 'JavaScript' ? 'JS' : lang.name.slice(0, 2).toUpperCase()}
+                    {lang.name === 'C++' ? 'C++' : lang.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="text-left">
                     <div className={isSelected ? 'text-white font-semibold' : 'text-slate-300'}>

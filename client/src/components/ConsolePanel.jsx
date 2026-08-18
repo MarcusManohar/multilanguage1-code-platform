@@ -9,6 +9,7 @@ export default function ConsolePanel({
   stderr,
   onClearOutput,
   isRunning,
+  embedded = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -28,8 +29,10 @@ export default function ConsolePanel({
 
   return (
     <div
-      className={`bg-[#0d1117] border-t border-[#30363d] flex flex-col transition-all duration-200 select-none ${
-        isExpanded ? 'h-72' : 'h-48'
+      className={`bg-[#0d1117] ${
+        embedded
+          ? 'flex flex-col h-full'
+          : `border-t border-[#30363d] flex flex-col transition-all duration-200 select-none ${isExpanded ? 'h-72' : 'h-48'}`
       }`}
     >
       {/* Console Header & Tabs */}

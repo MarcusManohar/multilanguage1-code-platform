@@ -62,18 +62,6 @@ int main() {
     description: 'Expressive, versatile syntax ideal for scripting, AI, and data processing.',
     starterCode: `print("Hello, CodeLab!")`,
   },
-  {
-    id: 'javascript',
-    name: 'JavaScript',
-    extension: '.js',
-    fileName: 'index.js',
-    monacoId: 'javascript',
-    version: 'Node.js 20',
-    color: '#F7DF1E',
-    bgColor: 'rgba(247, 223, 30, 0.15)',
-    description: 'The language of the modern web with rich asynchronous runtime APIs.',
-    starterCode: `console.log("Hello, CodeLab!");`,
-  },
 ];
 
 export const DEFAULT_LANGUAGE = LANGUAGES[0]; // C++

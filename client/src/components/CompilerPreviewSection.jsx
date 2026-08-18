@@ -64,8 +64,8 @@ export default function CompilerPreviewSection({ onNavigate }) {
                   <span>Java (Main.java)</span>
                 </div>
                 <div className="px-2.5 py-1.5 text-slate-400 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#F7DF1E]"></span>
-                  <span>JS (index.js)</span>
+                  <span className="w-2 h-2 rounded-full bg-[#A8B9CC]"></span>
+                  <span>C (main.c)</span>
                 </div>
               </div>
             </div>

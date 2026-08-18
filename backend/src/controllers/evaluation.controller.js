@@ -1,4 +1,4 @@
-const jobService = require('../services/job.service');
+const evaluationService = require('../services/evaluation.service');
 
 /**
  * Evaluation Controller
@@ -12,16 +12,9 @@ class EvaluationController {
     try {
       const { language, code, testCases } = req.body;
 
-      const job = jobService.createEvaluationJob({ language, code, testCases });
+      const result = await evaluationService.evaluateCode({ language, code, testCases });
 
-      return res.status(200).json({
-        success: true,
-        status: job.status,
-        message: 'Evaluation engine will be connected in the next stage.',
-        jobId: job.jobId,
-        language: job.language,
-        testCasesCount: job.testCasesCount,
-      });
+      return res.status(200).json(result);
     } catch (error) {
       return next(error);
     }
@@ -29,3 +22,4 @@ class EvaluationController {
 }
 
 module.exports = new EvaluationController();
+
