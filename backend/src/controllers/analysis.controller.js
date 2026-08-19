@@ -62,6 +62,22 @@ class AnalysisController {
       return next(error);
     }
   }
+
+  /**
+   * Handle AI code analysis request (student code only)
+   * POST /api/analysis/run-ai
+   */
+  async runAIAnalysis(req, res, next) {
+    try {
+      const { language, code } = req.body;
+
+      const result = await analysisService.analyzeCodeWithAI({ language, code });
+
+      return res.status(200).json(result);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 module.exports = new AnalysisController();

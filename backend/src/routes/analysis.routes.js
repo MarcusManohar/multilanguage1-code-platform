@@ -23,5 +23,12 @@ router.post('/compare', analysisController.compareCode);
  */
 router.post('/compare-ai', analysisController.compareWithAI);
 
+/**
+ * @route   POST /api/analysis/run-ai
+ * @desc    Analyze student code with AI for actionable feedback
+ * @access  Public
+ */
+router.post('/run-ai', analysisController.runAIAnalysis);
+
 module.exports = router;
 

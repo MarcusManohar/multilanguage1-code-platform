@@ -155,6 +155,31 @@ class AnalysisService {
       aiReport,
     };
   }
+
+  /**
+   * Run code analysis for submitted code and get student-friendly AI feedback
+   * @param {Object} params
+   * @param {string} params.language
+   * @param {string} params.code
+   * @returns {Promise<Object>} Analysis result with AI report
+   */
+  async analyzeCodeWithAI({ language, code }) {
+    // Step 1: Run deterministic analysis to check for basic syntax issues
+    const deterministicResult = await this.analyzeCode({ language, code });
+
+    // Step 2: Generate AI report
+    const aiReport = await aiService.analyzeStudentCodeWithAI({
+      language: deterministicResult.language,
+      code,
+      studentAnalysis: deterministicResult
+    });
+
+    return {
+      success: true,
+      language: deterministicResult.language,
+      aiReport,
+    };
+  }
 }
 
 module.exports = new AnalysisService();

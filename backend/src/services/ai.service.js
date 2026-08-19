@@ -1,4 +1,5 @@
 const { GoogleGenAI } = require('@google/genai');
+const crypto = require('crypto');
 
 const PRIMARY_MODEL = 'gemini-3.6-flash';
 const FALLBACK_MODEL = 'gemini-2.5-flash';
@@ -6,6 +7,7 @@ const FALLBACK_MODEL = 'gemini-2.5-flash';
 class AIService {
   constructor() {
     this._ai = null;
+    this.studentAnalysisCache = new Map();
   }
 
   /**
@@ -248,6 +250,234 @@ JSON SCHEMA:
       ],
       assessment:
         'Similarity analysis is an analytical signal and does not by itself establish AI use or academic misconduct.',
+    };
+  }
+
+  _getStudentAnalysisSystemInstruction() {
+    return `You are CodeLab AI Assistant, a beginner-friendly programming tutor. Your job is to analyze a student's code and provide simple, actionable feedback.
+
+GUIDELINES:
+1. Be extremely clear, concise, and encouraging. Use simple language.
+2. NEVER mention technical metrics like AST, node density, cyclomatic complexity, lexical similarity, token counts, or structural similarity.
+3. If there is a compilation error, syntax error, or logical bug, clearly explain it and how to fix it.
+4. If the code is perfectly correct and efficient, say so. Do not invent problems.
+5. Focus on what is right, what is wrong, and how to improve.
+6. Return ONLY valid JSON conforming to the schema below.
+7. Keep your explanations concise. Limit your response length to what is strictly necessary to populate the required fields. Do NOT write long paragraphs.
+
+JSON SCHEMA:
+{
+  "overallStatus": {
+    "status": "Correct" | "Mostly correct" | "Has errors",
+    "explanation": "A short one-sentence explanation of the status."
+  },
+  "problems": [
+    "String describing a specific bug, syntax error, or logical mistake."
+  ],
+  "whatItDoes": "Beginner-friendly explanation of the code's purpose.",
+  "improvements": [
+    {
+      "suggestion": "Practical improvement suggestion",
+      "reason": "Why this improvement is useful in simple terms"
+    }
+  ],
+  "performance": {
+    "meaningful": boolean,
+    "explanation": "Simple explanation of time/space complexity, only if meaningful (e.g. 'Time: O(n) — the program goes through the list once.'). If not meaningful or too simple, leave empty."
+  },
+  "testCases": [
+    {
+      "description": "What to test (e.g., edge cases)",
+      "expectedResult": "Expected behavior"
+    }
+  ],
+  "beginnerTip": "One short educational tip relevant to the code."
+}`;
+  }
+
+  _buildStudentAnalysisPrompt({ language, code, syntaxValid }) {
+    return JSON.stringify(
+      {
+        language: language.toUpperCase(),
+        code: code,
+        syntaxValid: syntaxValid !== false
+      },
+      null,
+      2
+    );
+  }
+
+  async analyzeStudentCodeWithAI({ language, code, studentAnalysis }) {
+    const cacheKey = crypto.createHash('md5').update(`${language}:${code}`).digest('hex');
+    if (this.studentAnalysisCache.has(cacheKey)) {
+      console.log(`[AI Service] Cache hit for ${language} analysis.`);
+      return this.studentAnalysisCache.get(cacheKey);
+    }
+
+    const promptData = this._buildStudentAnalysisPrompt({
+      language,
+      code,
+      syntaxValid: studentAnalysis?.syntax?.valid
+    });
+    const systemInstruction = this._getStudentAnalysisSystemInstruction();
+
+    // 1. Try CodeSentinel first
+    try {
+      const { Client } = require("@gradio/client");
+      const startTime = Date.now();
+      const hfToken = process.env.HF_TOKEN;
+      console.log(`[AI Service] CodeSentinel request started (Auth configured: ${!!hfToken})...`);
+      
+      const connectOptions = hfToken ? { token: hfToken } : {};
+      const codesentinel = await Client.connect("PraneetNS/CodeSentinel", connectOptions);
+      const fullPrompt = `${systemInstruction}\n\n${promptData}`;
+      
+      const predictPromise = codesentinel.predict("/generate", [fullPrompt]);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("CodeSentinel timeout")), 15000));
+      
+      const result = await Promise.race([predictPromise, timeoutPromise]);
+      const duration = Date.now() - startTime;
+      console.log(`[AI Service] CodeSentinel response received. Duration: ${duration}ms`);
+
+      const responseText = result.data[0];
+      
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.substring(7);
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.substring(3);
+      }
+      if (cleanText.endsWith('```')) {
+        cleanText = cleanText.substring(0, cleanText.length - 3);
+      }
+      cleanText = cleanText.trim();
+
+      const parsed = JSON.parse(cleanText);
+      if (!Array.isArray(parsed.problems)) parsed.problems = [];
+
+      const finalReport = {
+        available: true,
+        model: 'CodeSentinel',
+        report: parsed,
+      };
+      
+      this.studentAnalysisCache.set(cacheKey, finalReport);
+      return finalReport;
+    } catch (csError) {
+      console.error('[AI Service Error] CodeSentinel failed, falling back to Gemini:', csError.message);
+    }
+
+    // 2. Fallback to Gemini
+    const geminiStartTime = Date.now();
+    if (!process.env.GEMINI_API_KEY) {
+      return {
+        available: false,
+        model: null,
+        error: 'GEMINI_API_KEY is not configured in backend environment.',
+        report: this._generateStudentFallbackReport(language),
+      };
+    }
+
+    let responseText = null;
+    let usedModel = PRIMARY_MODEL;
+
+    try {
+      const ai = this._getAI();
+      const res = await ai.models.generateContent({
+        model: PRIMARY_MODEL,
+        contents: promptData,
+        config: {
+          systemInstruction,
+          temperature: 0.3,
+          responseMimeType: 'application/json',
+        },
+      });
+
+      responseText = res.text;
+    } catch (primaryErr) {
+      try {
+        const ai = this._getAI();
+        usedModel = FALLBACK_MODEL;
+        const fallbackRes = await ai.models.generateContent({
+          model: FALLBACK_MODEL,
+          contents: promptData,
+          config: {
+            systemInstruction,
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+          },
+        });
+        responseText = fallbackRes.text;
+      } catch (fallbackErr) {
+        const safeMessage =
+          primaryErr.status === 429 || fallbackErr.status === 429
+            ? 'Gemini API rate limit reached. Please wait a moment.'
+            : `AI analysis service unavailable: ${fallbackErr.message || primaryErr.message}`;
+
+        console.error('[AI Service Error]:', safeMessage);
+
+        return {
+          available: false,
+          model: null,
+          error: safeMessage,
+          report: this._generateStudentFallbackReport(language),
+        };
+      }
+    }
+
+    try {
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.substring(7);
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.substring(3);
+      }
+      if (cleanText.endsWith('```')) {
+        cleanText = cleanText.substring(0, cleanText.length - 3);
+      }
+      cleanText = cleanText.trim();
+
+      const parsed = JSON.parse(cleanText);
+      
+      // Ensure problems is an array or default to empty
+      if (!Array.isArray(parsed.problems)) parsed.problems = [];
+      
+      const geminiDuration = Date.now() - geminiStartTime;
+      console.log(`[AI Service] Gemini fallback response received. Duration: ${geminiDuration}ms`);
+
+      const finalReport = {
+        available: true,
+        model: usedModel,
+        report: parsed,
+      };
+      
+      this.studentAnalysisCache.set(cacheKey, finalReport);
+      return finalReport;
+    } catch (parseError) {
+      console.error('[AI Parse Error] Failed to parse Gemini response:', parseError.message);
+      console.error('Raw response snippet:', responseText ? responseText.substring(0, 200) : 'null');
+      
+      return {
+        available: true,
+        model: usedModel,
+        error: 'AI generated an invalid response format.',
+        report: this._generateStudentFallbackReport(language),
+      };
+    }
+  }
+
+  _generateStudentFallbackReport(language) {
+    return {
+      overallStatus: {
+        status: "Mostly correct",
+        explanation: "AI analysis is currently unavailable to fully verify this code."
+      },
+      problems: [],
+      whatItDoes: `This is a ${language.toUpperCase()} program. AI analysis is offline, so a detailed breakdown is unavailable.`,
+      improvements: [],
+      performance: { meaningful: false, explanation: "" },
+      testCases: [{ description: "Run with standard inputs", expectedResult: "Verify the output matches expectations" }],
+      beginnerTip: "Always test your code with different inputs to find hidden bugs!"
     };
   }
 }
