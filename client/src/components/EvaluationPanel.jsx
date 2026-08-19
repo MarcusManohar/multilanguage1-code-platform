@@ -314,16 +314,16 @@ export default function EvaluationPanel({ code, language, isRunning }) {
                               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-semibold">
                                 Expected Output
                               </div>
-                              <pre className="font-mono text-xs text-emerald-300 bg-[#0f2b1d] border border-emerald-900/40 rounded-md px-2.5 py-2 whitespace-pre-wrap break-all min-h-[2rem]">
+                              <pre className="font-mono text-xs text-emerald-300 bg-[#0f2b1d] border border-emerald-900/40 rounded-md px-2.5 py-2 whitespace-pre overflow-x-auto min-h-[2rem] custom-scrollbar">
                                 {tc.expectedOutput || '(empty)'}
                               </pre>
                             </div>
-                            <div>
+                            <div className="min-w-0">
                               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-semibold">
                                 Actual Output
                               </div>
                               <pre
-                                className={`font-mono text-xs border rounded-md px-2.5 py-2 whitespace-pre-wrap break-all min-h-[2rem] ${
+                                className={`font-mono text-xs border rounded-md px-2.5 py-2 whitespace-pre overflow-x-auto min-h-[2rem] custom-scrollbar ${
                                   tc.passed
                                     ? 'text-emerald-300 bg-[#0f2b1d] border-emerald-900/40'
                                     : 'text-rose-300 bg-[#2b0f0f] border-rose-900/40'
@@ -335,11 +335,11 @@ export default function EvaluationPanel({ code, language, isRunning }) {
                           </div>
 
                           {tc.error && (
-                            <div>
+                            <div className="min-w-0">
                               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-semibold">
                                 Error
                               </div>
-                              <pre className="font-mono text-xs text-amber-300 bg-amber-950/30 border border-amber-900/30 rounded-md px-2.5 py-2 whitespace-pre-wrap break-all max-h-24 overflow-y-auto">
+                              <pre className="font-mono text-xs text-amber-300 bg-amber-950/30 border border-amber-900/30 rounded-md px-2.5 py-2 whitespace-pre overflow-x-auto max-h-24 overflow-y-auto custom-scrollbar">
                                 {tc.error}
                               </pre>
                             </div>

@@ -160,15 +160,15 @@ export default function AnalysisPanel({ code, language, isRunning }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('analyze')}
-            className={`text-xs font-semibold px-2 py-1 rounded transition-colors ${activeTab === 'analyze' ? 'bg-[#30363d] text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'}`}
+            className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded transition-colors ${activeTab === 'analyze' ? 'bg-[#30363d] text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'}`}
           >
-            🤖 AI Code Analysis
+            🤖 <span className="hidden sm:inline">AI Code Analysis</span><span className="inline sm:hidden">Analyze</span>
           </button>
           <button
             onClick={() => setActiveTab('similarity')}
-            className={`text-xs font-semibold px-2 py-1 rounded transition-colors ${activeTab === 'similarity' ? 'bg-[#30363d] text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'}`}
+            className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded transition-colors ${activeTab === 'similarity' ? 'bg-[#30363d] text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'}`}
           >
-            Code Similarity
+            <span className="hidden sm:inline">Code Similarity</span><span className="inline sm:hidden">Similarity</span>
           </button>
         </div>
 
@@ -176,25 +176,25 @@ export default function AnalysisPanel({ code, language, isRunning }) {
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing || isRunning}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all shadow-sm ${
+            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold rounded-md transition-all shadow-sm ${
               isAnalyzing || isRunning
                 ? 'bg-cyan-800/50 text-cyan-300 cursor-not-allowed'
                 : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white shadow-cyan-600/30 hover:shadow-cyan-600/50'
             }`}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Run AI Analysis'}
+            {isAnalyzing ? 'Analyzing...' : <><span className="hidden sm:inline">Run AI Analysis</span><span className="inline sm:hidden">Run</span></>}
           </button>
         ) : (
           <button
             onClick={handleCompare}
             disabled={isComparing || isRunning}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all shadow-sm ${
+            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold rounded-md transition-all shadow-sm ${
               isComparing || isRunning
                 ? 'bg-cyan-800/50 text-cyan-300 cursor-not-allowed'
                 : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white shadow-cyan-600/30 hover:shadow-cyan-600/50'
             }`}
           >
-            {isComparing ? 'Comparing...' : 'Run Similarity Check'}
+            {isComparing ? 'Comparing...' : <><span className="hidden sm:inline">Run Similarity Check</span><span className="inline sm:hidden">Run</span></>}
           </button>
         )}
       </div>

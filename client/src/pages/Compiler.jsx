@@ -275,7 +275,7 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
               <button
                 id="bottom-tab-console"
                 onClick={() => setBottomPanel('console')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-t-md transition-colors ${
                   bottomPanel === 'console'
                     ? 'bg-[#0d1117] text-white border-t-2 border-indigo-500 border-x border-[#30363d]'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'
@@ -291,7 +291,7 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
               <button
                 id="bottom-tab-evaluate"
                 onClick={() => setBottomPanel('evaluate')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-t-md transition-colors ${
                   bottomPanel === 'evaluate'
                     ? 'bg-[#0d1117] text-white border-t-2 border-indigo-500 border-x border-[#30363d]'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'
@@ -307,7 +307,7 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
               <button
                 id="bottom-tab-analyze"
                 onClick={() => setBottomPanel('analyze')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-t-md transition-colors ${
                   bottomPanel === 'analyze'
                     ? 'bg-[#0d1117] text-white border-t-2 border-cyan-500 border-x border-[#30363d]'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-[#21262d]'

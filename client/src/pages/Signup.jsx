@@ -40,7 +40,7 @@ export default function Signup({ onNavigate }) {
       </div>
 
       {/* Signup Card */}
-      <div className="w-full max-w-md bg-[#161b22] border border-[#30363d] rounded-2xl p-8 shadow-2xl shadow-black/80 backdrop-blur-xl">
+      <div className="w-full max-w-md bg-[#161b22] border border-[#30363d] rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/80 backdrop-blur-xl">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-white mb-1.5">Welcome to CodeLab</h2>
           <p className="text-xs sm:text-sm text-slate-400">
