@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Compiler from './pages/Compiler';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
   // Parse path & params from window.location
@@ -58,18 +59,22 @@ export default function App() {
   // Route matching
   const { route, params } = locationState;
 
-  if (route === '/compiler') {
-    return <Compiler onNavigate={navigate} initialLanguageId={params.lang} />;
-  }
+  const renderRoute = () => {
+    if (route === '/compiler') {
+      return <Compiler onNavigate={navigate} initialLanguageId={params.lang} />;
+    }
+    if (route === '/login') {
+      return <Login onNavigate={navigate} />;
+    }
+    if (route === '/signup') {
+      return <Signup onNavigate={navigate} />;
+    }
+    return <Home onNavigate={navigate} />;
+  };
 
-  if (route === '/login') {
-    return <Login onNavigate={navigate} />;
-  }
-
-  if (route === '/signup') {
-    return <Signup onNavigate={navigate} />;
-  }
-
-  // Default to Home page
-  return <Home onNavigate={navigate} />;
+  return (
+    <AuthProvider>
+      {renderRoute()}
+    </AuthProvider>
+  );
 }

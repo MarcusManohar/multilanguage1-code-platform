@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function HomeNavbar({ onNavigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const handleNav = (path, e) => {
     if (e) e.preventDefault();
@@ -69,18 +71,37 @@ export default function HomeNavbar({ onNavigate }) {
 
         {/* Right: Auth CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={(e) => handleNav('/login', e)}
-            className="px-3.5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-[#21262d] rounded-lg transition-colors"
-          >
-            Log In
-          </button>
-          <button
-            onClick={(e) => handleNav('/signup', e)}
-            className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-all shadow-md shadow-indigo-600/25 hover:shadow-indigo-600/40 active:scale-95"
-          >
-            Get Started
-          </button>
+          {user ? (
+            <>
+              <span className="text-sm font-medium text-slate-300 truncate max-w-[150px]">
+                {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
+              </span>
+              <button
+                onClick={async () => {
+                  await signOut();
+                  onNavigate('/');
+                }}
+                className="px-3.5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-[#21262d] rounded-lg transition-colors"
+              >
+                Log Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={(e) => handleNav('/login', e)}
+                className="px-3.5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-[#21262d] rounded-lg transition-colors"
+              >
+                Log In
+              </button>
+              <button
+                onClick={(e) => handleNav('/signup', e)}
+                className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-all shadow-md shadow-indigo-600/25 hover:shadow-indigo-600/40 active:scale-95"
+              >
+                Get Started
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -131,18 +152,38 @@ export default function HomeNavbar({ onNavigate }) {
             </button>
           </div>
           <div className="pt-3 border-t border-[#30363d] flex flex-col gap-2">
-            <button
-              onClick={(e) => handleNav('/login', e)}
-              className="w-full py-2 text-sm font-medium text-slate-300 bg-[#21262d] hover:bg-[#30363d] rounded-lg transition-colors text-center"
-            >
-              Log In
-            </button>
-            <button
-              onClick={(e) => handleNav('/signup', e)}
-              className="w-full py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors text-center shadow-md shadow-indigo-600/30"
-            >
-              Get Started
-            </button>
+            {user ? (
+              <>
+                <div className="w-full py-2 text-sm font-medium text-slate-300 text-center truncate px-4">
+                  {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
+                </div>
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    setMobileMenuOpen(false);
+                    onNavigate('/');
+                  }}
+                  className="w-full py-2 text-sm font-medium text-slate-300 bg-[#21262d] hover:bg-[#30363d] rounded-lg transition-colors text-center"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={(e) => handleNav('/login', e)}
+                  className="w-full py-2 text-sm font-medium text-slate-300 bg-[#21262d] hover:bg-[#30363d] rounded-lg transition-colors text-center"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={(e) => handleNav('/signup', e)}
+                  className="w-full py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors text-center shadow-md shadow-indigo-600/30"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

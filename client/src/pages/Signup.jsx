@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function Signup({ onNavigate }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setInfoMessage('Passwords do not match.');
-      return;
+  const handleGoogleAuth = async () => {
+    setInfoMessage('');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      setInfoMessage(error.message);
     }
-    setInfoMessage('Authentication will be connected with Supabase.');
-  };
-
-  const handleGoogleAuth = () => {
-    setInfoMessage('Google OAuth will be connected with Supabase.');
   };
 
   return (
@@ -45,9 +42,9 @@ export default function Signup({ onNavigate }) {
       {/* Signup Card */}
       <div className="w-full max-w-md bg-[#161b22] border border-[#30363d] rounded-2xl p-8 shadow-2xl shadow-black/80 backdrop-blur-xl">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white mb-1.5">Create your CodeLab account</h2>
+          <h2 className="text-2xl font-bold text-white mb-1.5">Welcome to CodeLab</h2>
           <p className="text-xs sm:text-sm text-slate-400">
-            Start building, compiling, and sharing code.
+            Sign in to start coding with CodeLab.
           </p>
         </div>
 
@@ -60,82 +57,6 @@ export default function Signup({ onNavigate }) {
             <span>{infoMessage}</span>
           </div>
         )}
-
-        {/* Signup Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Full Name
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ada Lovelace"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all active:scale-[0.98] mt-2"
-          >
-            Create Account
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[#30363d]"></div>
-          </div>
-          <span className="relative px-3 bg-[#161b22] text-slate-500 text-xs uppercase tracking-wider">
-            Or
-          </span>
-        </div>
 
         {/* Google OAuth Button */}
         <button

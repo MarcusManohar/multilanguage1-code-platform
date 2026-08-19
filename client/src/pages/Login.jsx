@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function Login({ onNavigate }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setInfoMessage('Authentication will be connected with Supabase.');
-  };
-
-  const handleGoogleAuth = () => {
-    setInfoMessage('Google OAuth will be connected with Supabase.');
-  };
-
-  const handleForgotPassword = (e) => {
-    e.preventDefault();
-    setInfoMessage('Password recovery will be connected with Supabase.');
+  const handleGoogleAuth = async () => {
+    setInfoMessage('');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      setInfoMessage(error.message);
+    }
   };
 
   return (
@@ -59,63 +57,6 @@ export default function Login({ onNavigate }) {
             <span>{infoMessage}</span>
           </div>
         )}
-
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-slate-300">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                Forgot password?
-              </button>
-            </div>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all active:scale-[0.98] mt-2"
-          >
-            Log In
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[#30363d]"></div>
-          </div>
-          <span className="relative px-3 bg-[#161b22] text-slate-500 text-xs uppercase tracking-wider">
-            Or
-          </span>
-        </div>
 
         {/* Google OAuth Button */}
         <button

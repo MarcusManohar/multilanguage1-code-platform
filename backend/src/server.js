@@ -47,7 +47,7 @@ app.use(errorHandler);
 
 // Start server if not imported
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`[CodeLab API] Server is running on port ${PORT}`);
     console.log(`[CodeLab API] Health check available at: http://localhost:${PORT}/api/health`);
   });
