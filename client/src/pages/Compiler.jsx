@@ -113,6 +113,14 @@ export default function Compiler({ onNavigate, initialLanguageId }) {
 
     const codeToRun = codes[currentLanguage.id] || '';
 
+    if (!codeToRun.trim()) {
+      setStdout('');
+      setStderr('⚠️ No code\n\nPlease enter some code before running.');
+      setActiveConsoleTab('errors');
+      setIsRunning(false);
+      return;
+    }
+
     try {
       const response = await runCode({
         language: currentLanguage.id,

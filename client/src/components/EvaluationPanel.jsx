@@ -95,7 +95,7 @@ export default function EvaluationPanel({ code, language, isRunning }) {
   const handleEvaluate = useCallback(async () => {
     if (isEvaluating || isRunning) return;
     if (!code || !code.trim()) {
-      setError('Code is empty. Write some code in the editor before evaluating.');
+      setError('⚠️ No code\nPlease enter some code before running.');
       setResult(null);
       return;
     }

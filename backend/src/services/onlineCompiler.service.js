@@ -122,11 +122,22 @@ class OnlineCompilerService {
     const hasNoError = !responseData.error || responseData.error.trim() === '';
     const success = isStatusSuccess || (hasZeroExit && hasNoError);
 
+    let parsedError = typeof responseData.error === 'string' ? responseData.error : '';
+
+    if (parsedError === 'Internal error: code execution failed' || parsedError.includes('EOFError') || parsedError.includes('NoSuchElementException')) {
+      const requiresInput = /input\(|sys\.stdin|Scanner|BufferedReader|cin|scanf/.test(code);
+      if ((typeof stdin !== 'string' || !stdin.trim()) && requiresInput) {
+        parsedError = 'No input — The program expects input but none was provided.';
+      } else if (parsedError === 'Internal error: code execution failed') {
+        parsedError = 'Runtime error: Program crashed during execution.';
+      }
+    }
+
     return {
       success,
       status: responseData.status || (success ? 'success' : 'error'),
       output: typeof responseData.output === 'string' ? responseData.output : '',
-      error: typeof responseData.error === 'string' ? responseData.error : '',
+      error: parsedError,
       exitCode: typeof responseData.exit_code === 'number' ? responseData.exit_code : (success ? 0 : 1),
       executionTime:
         responseData.time !== undefined && responseData.time !== null

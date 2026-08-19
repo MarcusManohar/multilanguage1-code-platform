@@ -83,7 +83,7 @@ export default function AnalysisPanel({ code, language, isRunning }) {
   const handleAnalyze = useCallback(async () => {
     if (isAnalyzing || isRunning) return;
     if (!code || !code.trim()) {
-      setAnalysisError('Editor code is empty. Write or load some code in the editor before analyzing.');
+      setAnalysisError('⚠️ No code\nPlease enter some code before running.');
       setAnalysisResult(null);
       return;
     }
@@ -106,7 +106,7 @@ export default function AnalysisPanel({ code, language, isRunning }) {
   const handleCompare = useCallback(async () => {
     if (isComparing || isRunning) return;
     if (!code || !code.trim()) {
-      setCompareError('Editor code is empty. Write or load some code in the editor before analyzing.');
+      setCompareError('⚠️ No code\nPlease enter some code before running.');
       setCompareResult(null);
       return;
     }
